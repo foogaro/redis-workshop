@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LOREMIPSUM Inc. - S.C.A.M. - Scientific Complex Algorithms and Methods</title>
+    <!--link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet"-->
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    
+</head>
+<body style="color: #282550">
+    <noscript>
+        <h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being
+            enabled. Please enable
+            Javascript and reload this page!</h2>
+    </noscript>
+
+    <div class="jumbotron text-center" style="background-color: white; border-bottom-right-radius: 20px; border-bottom-left-radius: 20px;">
+        <div>
+            <img src="logo-1.png" style="height: 200px;" />
+        </div>
+    </div>
+
+    <div id="anchor" th:insert="fragments.html :: #data"></div>
+
+    <div id="myDiv" >
+    </div>
+
+    <script src="/app.js"></script>
+    
+    <div class="text-center">
+        <button onClick="localRefresh()" >Calculate</button>
+    </div>
+</body>
+</html>
