@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  monolith:
+    image: foogaro/redis-workshop/monolith:latest
+    build: .
+    tty: false
+    environment:
+      SERVER_PORT: 8000
+    ports:
+      - 8000:8000
+    expose:
+      - 8000
+    networks:
+      - redis-workshop
+
+networks:
+  redis-workshop:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.30.0.0/16

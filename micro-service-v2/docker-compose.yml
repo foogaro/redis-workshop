@@ -1,0 +1,78 @@
+version: "3"
+
+services:
+  redis:
+    image: redis:6.2.4
+    container_name: redis
+    tty: false
+    cap_add:
+      - SYS_RESOURCE
+    ports:
+      - "6379:6379"
+    networks:
+      - redis-workshop
+
+  backend:
+    image: foogaro/redis-workshop/backend:v2
+    build: ./backend
+    deploy:
+      replicas: 3
+      mode: replicated
+    tty: false
+    environment:
+      SERVER_PORT: 8000
+      redis.host: redis
+      redis.port: 6379
+    expose:
+      - 8000
+    depends_on:
+      - redis
+    networks:
+      - redis-workshop
+
+  nginx-be:
+    image: nginx:latest
+    tty: false
+    volumes:
+      - ./nginx-be.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - 8000:8000
+    depends_on:
+      - backend
+    networks:
+      - redis-workshop
+
+  frontend:
+    image: foogaro/redis-workshop/frontend:v2
+    build: ./frontend
+    deploy:
+      replicas: 3
+      mode: replicated
+    tty: false
+    environment:
+      SERVER_PORT: 9000
+      BACKEND_ENDPOINT: http://nginx-be:8000/results
+    expose:
+      - 9000
+    networks:
+      - redis-workshop
+
+  nginx-fe:
+    image: nginx:latest
+    tty: false
+    volumes:
+      - ./nginx-fe.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - 9000:9000
+    depends_on:
+      - frontend
+    networks:
+      - redis-workshop
+
+networks:
+  redis-workshop:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.32.0.0/16

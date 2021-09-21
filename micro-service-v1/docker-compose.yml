@@ -1,0 +1,59 @@
+version: "3"
+
+services:
+  backend:
+    image: foogaro/redis-workshop/backend:v1
+    build: ./backend
+    tty: false
+    environment:
+      SERVER_PORT: 8000
+    expose:
+      - 8000
+    networks:
+      - redis-workshop
+
+  nginx-be:
+    image: nginx:latest
+    tty: false
+    volumes:
+      - ./nginx-be.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - 8000:8000
+    depends_on:
+      - backend
+    networks:
+      - redis-workshop
+
+  frontend:
+    image: foogaro/redis-workshop/frontend:v1
+    build: ./frontend
+    deploy:
+      replicas: 3
+    tty: false
+    environment:
+      SERVER_PORT: 9000
+      BACKEND_ENDPOINT: http://nginx-be:8000/result
+    expose:
+      - 9000
+    networks:
+      - redis-workshop
+
+  nginx-fe:
+    image: nginx:latest
+    tty: false
+    volumes:
+      - ./nginx-fe.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - 9000:9000
+    depends_on:
+      - frontend
+    networks:
+      - redis-workshop
+
+networks:
+  redis-workshop:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.31.0.0/16

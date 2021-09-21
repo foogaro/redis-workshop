@@ -1,0 +1,72 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis:6.2.4
+    container_name: redis
+    cap_add:
+      - SYS_RESOURCE
+    expose:
+      - 6379
+    ports:
+      - "6379:6379"
+    networks:
+      - redis-workshop
+
+  backend:
+    image: foogaro/redis-workshop/backend:v4
+    build: ./backend
+    deploy:
+      replicas: 1
+      mode: replicated
+    environment:
+      SERVER_PORT: 8000
+      spring.redis.host: redis
+      spring.redis.port: 6379
+      redis.keyspace: "loremipsum:ai:stream"
+    expose:
+      - 8000
+    depends_on:
+      - redis
+    networks:
+      - redis-workshop
+
+  frontend:
+    image: foogaro/redis-workshop/frontend:v4
+    build: ./frontend
+    deploy:
+      replicas: 1
+      mode: replicated
+    environment:
+      SERVER_PORT: 9000
+      spring.redis.host: redis
+      spring.redis.port: 6379
+      redis.keyspace: "loremipsum:ai:stream"
+      redis.stream.entry.id: "0-0"
+      websocket.destination: /loremipsum-ai-stream
+      stomp.endpoint: /numbers-websocket
+    expose:
+      - 9000
+    depends_on:
+      - redis
+    networks:
+      - redis-workshop
+
+  nginx-fe:
+    image: nginx:latest
+    volumes:
+      - ./nginx-fe.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - 9000:9000
+    depends_on:
+      - frontend
+    networks:
+      - redis-workshop
+
+networks:
+  redis-workshop:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.32.0.0/16
